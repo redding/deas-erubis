@@ -1,6 +1,6 @@
-# DeasErubis
+# Deas::Erubis
 
-TODO: Write a gem description
+[Deas](https://github.com/redding/deas) template engine for rendering [Erubis](http://www.kuwata-lab.com/erubis/) templates
 
 ## Usage
 

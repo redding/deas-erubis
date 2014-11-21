@@ -1,5 +1,5 @@
 require "deas-erubis/version"
 
-module DeasErubis
+module Deas::Erubis
   # TODO: your code goes here...
 end
