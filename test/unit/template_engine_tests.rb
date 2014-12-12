@@ -28,6 +28,12 @@ class Deas::Erubis::TemplateEngine
       assert_same subject.erb_source, subject.erb_source
     end
 
+    should "allow custom eruby classes on its source" do
+      custom_eruby = 'some-eruby'
+      engine = Deas::Erubis::TemplateEngine.new('eruby' => custom_eruby)
+      assert_equal custom_eruby, engine.erb_source.eruby_class
+    end
+
     should "use 'view' as the handler local name by default" do
       assert_equal 'view', subject.erb_handler_local
     end

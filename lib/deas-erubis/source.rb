@@ -7,20 +7,26 @@ module Deas::Erubis
   class Source
 
     EXT = ".erb"
+    DEFAULT_ERUBY = ::Erubis::Eruby
 
     attr_reader :root, :eruby_class, :context_class
 
-    def initialize(root, locals = nil)
+    def initialize(root, *args)
       @root = Pathname.new(root.to_s)
-      @eruby_class = ::Erubis::Eruby # TODO: allow for custom classes
+      locals, @eruby_class = [
+        args.last.kind_of?(::Hash) ? args.pop : {},
+        args.last || DEFAULT_ERUBY
+      ]
       @context_class = Class.new do
-        (locals || {}).each{ |key, value| define_method(key){ value } }
         # TODO: mixin context helpers?
+        locals.each{ |key, value| define_method(key){ value } }
       end
     end
 
     def inspect
-      "#<#{self.class}:#{'0x0%x' % (object_id << 1)} @root=#{@root.inspect}>"
+      "#<#{self.class}:#{'0x0%x' % (object_id << 1)}"\
+      " @root=#{@root.inspect}"\
+      " @eruby=#{@eruby_class.inspect}>"
     end
 
     private
