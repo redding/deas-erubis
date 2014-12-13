@@ -16,6 +16,10 @@ class Deas::Erubis::Source
       assert_equal ".erb", subject::EXT
     end
 
+    should "know its default eruby class" do
+      assert_equal ::Erubis::Eruby, subject::DEFAULT_ERUBY
+    end
+
   end
 
   class InitTests < UnitTests
@@ -32,12 +36,18 @@ class Deas::Erubis::Source
       assert_equal @root, subject.root.to_s
     end
 
-    should "know its eruby class" do
-      assert_equal ::Erubis::Eruby, subject.eruby_class
+    should "default its eruby class" do
+      assert_equal Deas::Erubis::Source::DEFAULT_ERUBY, subject.eruby_class
     end
 
     should "know its context class" do
       assert_instance_of ::Class, subject.context_class
+    end
+
+    should "optionally take a custom eruby class" do
+      eruby = 'some-eruby-class'
+      source = @source_class.new(@root, eruby)
+      assert_equal eruby, source.eruby_class
     end
 
     should "optionally take and apply default locals to its context class" do
