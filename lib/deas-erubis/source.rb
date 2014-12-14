@@ -13,14 +13,16 @@ module Deas::Erubis
 
     def initialize(root, *args)
       @root = Pathname.new(root.to_s)
-      locals, @eruby_class = [
+      default_locals, @eruby_class = [
         args.last.kind_of?(::Hash) ? args.pop : {},
         args.last || DEFAULT_ERUBY
       ]
-      @context_class = Class.new do
-        # TODO: mixin context helpers?
-        locals.each{ |key, value| define_method(key){ value } }
-      end
+      @context_class = build_context_class(default_locals)
+    end
+
+    def render(file_name, locals)
+      context = @context_class.new(locals)
+      @eruby_class.load_file(source_file_path(file_name)).evaluate(context)
     end
 
     def inspect
@@ -33,6 +35,23 @@ module Deas::Erubis
 
     def source_file_path(file_name)
       self.root.join("#{file_name}#{EXT}").to_s
+    end
+
+    def build_context_class(default_locals)
+      Class.new do
+        # TODO: mixin context helpers?
+        default_locals.each{ |key, value| define_method(key){ value } }
+
+        def initialize(locals)
+          # apply any given locals to context metaclass as methods
+          metaclass = class << self; self; end
+          metaclass.class_eval do
+            locals.each do |key, value|
+              define_method(key){ value }
+            end
+          end
+        end
+      end
     end
 
   end

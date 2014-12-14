@@ -11,12 +11,16 @@ module Factory
     TEMPLATE_ROOT.join(name).to_s
   end
 
-  def self.template_erb_rendered(view_handler, locals)
-    "<h1>name: #{view_handler.name}</h1>\n"\
+  def self.basic_erb_rendered(locals)
+    "<h1>name: #{locals['name']}</h1>\n"\
     "<h2>local1: #{locals['local1']}</h2>\n"
   end
 
-  def self.partial_erb_rendered(locals)
-    "<h2>local1: #{locals['local1']}</h2>\n"
+  def self.view_erb_rendered(engine, view_handler, locals)
+    "<h1>name: #{view_handler.name}</h1>\n"\
+    "<h2>local1: #{locals['local1']}</h2>\n"\
+    "<p>id: #{view_handler.identifier}</p>\n"\
+    "<p>logger: #{engine.logger.to_s}</p>\n"
   end
+
 end

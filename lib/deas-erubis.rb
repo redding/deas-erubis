@@ -26,9 +26,8 @@ module Deas::Erubis
     end
 
     def render(template_name, view_handler, locals)
-      # TODO: render passing view handler as local
       # TODO: look at view handler layouts and render in them??
-      raise NotImplementedError
+      self.erb_source.render(template_name, render_locals(view_handler, locals))
     end
 
     def partial(template_name, locals)

@@ -54,10 +54,18 @@ class Deas::Erubis::TemplateEngine
       assert_equal logger_local, engine.erb_logger_local
     end
 
-    should "not implement the engine render method" do
-      assert_raises NotImplementedError do
-        subject.render('template.erb', 'a-view-handler', {})
-      end
+    should "render erb templates" do
+      engine = Deas::Erubis::TemplateEngine.new({
+        'source_path' => TEMPLATE_ROOT
+      })
+      view_handler = OpenStruct.new({
+        :identifier => Factory.integer,
+        :name => Factory.string
+      })
+      locals = { 'local1' => Factory.string }
+      exp = Factory.view_erb_rendered(engine, view_handler, locals).to_s
+
+      assert_equal exp, engine.render('view', view_handler, locals)
     end
 
     should "not implement the engine partial method" do
