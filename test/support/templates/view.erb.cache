@@ -1,0 +1,6 @@
+_buf = ''; _buf << '<h1>name: '; _buf << ( view.name ).to_s; _buf << '</h1>
+<h2>local1: '; _buf << ( local1 ).to_s; _buf << '</h2>
+<p>id: '; _buf << ( view.identifier ).to_s; _buf << '</p>
+<p>logger: '; _buf << ( logger ).to_s; _buf << '</p>
+';
+_buf.to_s

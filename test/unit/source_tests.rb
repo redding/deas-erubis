@@ -31,6 +31,7 @@ class Deas::Erubis::Source
     subject{ @source }
 
     should have_readers :root, :eruby_class, :context_class
+    should have_imeths :render
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
@@ -53,10 +54,36 @@ class Deas::Erubis::Source
     should "optionally take and apply default locals to its context class" do
       local_name, local_val = [Factory.string, Factory.string]
       source = @source_class.new(@root, local_name => local_val)
-      context = source.context_class.new
+      context = source.context_class.new({})
 
       assert_responds_to local_name, context
       assert_equal local_val, context.send(local_name)
+    end
+
+    should "apply locals to its context class instances on init" do
+      local_name, local_val = [Factory.string, Factory.string]
+      context = subject.context_class.new(local_name => local_val)
+
+      assert_responds_to local_name, context
+      assert_equal local_val, context.send(local_name)
+    end
+
+  end
+
+  class RenderTests < InitTests
+    desc "`render` method"
+    setup do
+      @file_name = "basic"
+      @file_locals = {
+        'name'   => Factory.string,
+        'local1' => Factory.integer
+      }
+      @file_path = Factory.template_file("#{@file_name}#{Deas::Erubis::Source::EXT}")
+    end
+
+    should "render a template for the given file name and return its data" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, subject.render(@file_name, @file_locals)
     end
 
   end
