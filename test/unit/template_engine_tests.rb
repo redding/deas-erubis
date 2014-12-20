@@ -28,6 +28,12 @@ class Deas::Erubis::TemplateEngine
       assert_same subject.erb_source, subject.erb_source
     end
 
+    should "allow custom cache roots on its source" do
+      custom_cache = Factory.path
+      engine = Deas::Erubis::TemplateEngine.new('cache_root' => custom_cache)
+      assert_equal custom_cache, engine.erb_source.cache_root
+    end
+
     should "allow custom eruby classes on its source" do
       custom_eruby = 'some-eruby'
       engine = Deas::Erubis::TemplateEngine.new('eruby' => custom_eruby)

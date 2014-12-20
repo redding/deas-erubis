@@ -12,8 +12,9 @@ class Deas::Erubis::Source
     end
     subject{ @source_class }
 
-    should "know its extension" do
-      assert_equal ".erb", subject::EXT
+    should "know its extensions" do
+      assert_equal '.erb',       subject::EXT
+      assert_equal '.erb.cache', subject::CACHE_EXT
     end
 
     should "know its default eruby class" do
@@ -26,34 +27,43 @@ class Deas::Erubis::Source
     desc "when init"
     setup do
       @root = Factory.template_root
-      @source = @source_class.new(@root)
+      @source = @source_class.new(@root, {})
     end
     subject{ @source }
 
-    should have_readers :root, :eruby_class, :context_class
+    should have_readers :root, :cache_root, :eruby_class, :context_class
     should have_imeths :render
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
     end
 
-    should "default its eruby class" do
+    should "default its cache root and eruby class" do
+      assert_equal @root, subject.cache_root.to_s
       assert_equal Deas::Erubis::Source::DEFAULT_ERUBY, subject.eruby_class
+    end
+
+    should "optionally take a custom cache root" do
+      cache_root = Factory.path
+      source = @source_class.new(@root, :cache_root => cache_root)
+      assert_equal cache_root, source.cache_root
+    end
+
+    should "optionally take a custom eruby class" do
+      eruby = 'some-eruby-class'
+      source = @source_class.new(@root, :eruby => eruby)
+      assert_equal eruby, source.eruby_class
     end
 
     should "know its context class" do
       assert_instance_of ::Class, subject.context_class
     end
 
-    should "optionally take a custom eruby class" do
-      eruby = 'some-eruby-class'
-      source = @source_class.new(@root, eruby)
-      assert_equal eruby, source.eruby_class
-    end
-
     should "optionally take and apply default locals to its context class" do
       local_name, local_val = [Factory.string, Factory.string]
-      source = @source_class.new(@root, local_name => local_val)
+      source = @source_class.new(@root, {
+        :default_locals => { local_name => local_val }
+      })
       context = source.context_class.new({})
 
       assert_responds_to local_name, context
@@ -84,6 +94,23 @@ class Deas::Erubis::Source
     should "render a template for the given file name and return its data" do
       exp = Factory.basic_erb_rendered(@file_locals)
       assert_equal exp, subject.render(@file_name, @file_locals)
+    end
+
+    should "cache templates in the source cache root" do
+      cache_file_name = "#{@file_name}#{Deas::Erubis::Source::CACHE_EXT}"
+
+      cache_file = subject.cache_root.join(cache_file_name)
+      cache_file.delete if cache_file.exist?
+      assert_not_file_exists cache_file
+      subject.render(@file_name, @file_locals)
+      assert_file_exists cache_file
+
+      source = @source_class.new(@root, :cache_root => TEMPLATE_CACHE_ROOT)
+      cache_file = source.cache_root.join(cache_file_name)
+      cache_file.delete if cache_file.exist?
+      assert_not_file_exists cache_file
+      source.render(@file_name, @file_locals)
+      assert_file_exists cache_file
     end
 
   end
