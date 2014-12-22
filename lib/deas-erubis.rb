@@ -12,8 +12,10 @@ module Deas::Erubis
     DEFAULT_LOGGER_LOCAL  = 'logger'.freeze
 
     def erb_source
-      @erb_source ||= Source.new(self.source_path, self.opts['eruby'], {
-        self.erb_logger_local => self.logger
+      @erb_source ||= Source.new(self.source_path, {
+        :cache_root     => self.opts['cache_root'],
+        :eruby          => self.opts['eruby'],
+        :default_locals => { self.erb_logger_local => self.logger }
       })
     end
 

@@ -6,23 +6,21 @@ module Deas::Erubis
 
   class Source
 
-    EXT = ".erb"
+    EXT       = '.erb'.freeze
+    CACHE_EXT = "#{EXT}.cache".freeze
     DEFAULT_ERUBY = ::Erubis::Eruby
 
-    attr_reader :root, :eruby_class, :context_class
+    attr_reader :root, :cache_root, :eruby_class, :context_class
 
-    def initialize(root, *args)
-      @root = Pathname.new(root.to_s)
-      default_locals, @eruby_class = [
-        args.last.kind_of?(::Hash) ? args.pop : {},
-        args.last || DEFAULT_ERUBY
-      ]
-      @context_class = build_context_class(default_locals)
+    def initialize(root, opts)
+      @root          = Pathname.new(root.to_s)
+      @cache_root    = opts[:cache_root] || @root
+      @eruby_class   = opts[:eruby] || DEFAULT_ERUBY
+      @context_class = build_context_class(opts)
     end
 
     def render(file_name, locals)
-      context = @context_class.new(locals)
-      @eruby_class.load_file(source_file_path(file_name)).evaluate(context)
+      eruby(file_name).evaluate(@context_class.new(locals))
     end
 
     def inspect
@@ -33,17 +31,28 @@ module Deas::Erubis
 
     private
 
+    def eruby(file_name)
+      @eruby_class.load_file(source_file_path(file_name), {
+        :cachename => cache_file_path(file_name)
+      })
+    end
+
     def source_file_path(file_name)
       self.root.join("#{file_name}#{EXT}").to_s
     end
 
-    def build_context_class(default_locals)
+    def cache_file_path(file_name)
+      self.cache_root.join("#{file_name}#{CACHE_EXT}").tap do |path|
+        path.dirname.mkpath if !path.dirname.exist?
+      end.to_s
+    end
+
+    def build_context_class(opts)
       Class.new do
-        # TODO: mixin context helpers?
-        default_locals.each{ |key, value| define_method(key){ value } }
+        # TODO: mixin context helpers? `opts[:template_helpers]`
+        (opts[:default_locals] || {}).each{ |k, v| define_method(k){ v } }
 
         def initialize(locals)
-          # apply any given locals to context metaclass as methods
           metaclass = class << self; self; end
           metaclass.class_eval do
             locals.each do |key, value|
@@ -59,7 +68,7 @@ module Deas::Erubis
   class DefaultSource < Source
 
     def initialize
-      super('/')
+      super('/', {})
     end
 
   end
