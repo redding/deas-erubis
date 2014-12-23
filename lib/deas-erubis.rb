@@ -13,8 +13,8 @@ module Deas::Erubis
 
     def erb_source
       @erb_source ||= Source.new(self.source_path, {
-        :cache_root     => self.opts['cache_root'],
         :eruby          => self.opts['eruby'],
+        :cache          => self.opts['cache'],
         :default_locals => { self.erb_logger_local => self.logger }
       })
     end

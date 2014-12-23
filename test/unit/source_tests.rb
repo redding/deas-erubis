@@ -13,8 +13,8 @@ class Deas::Erubis::Source
     subject{ @source_class }
 
     should "know its extensions" do
-      assert_equal '.erb',       subject::EXT
-      assert_equal '.erb.cache', subject::CACHE_EXT
+      assert_equal '.erb',   subject::EXT
+      assert_equal '.cache', subject::CACHE_EXT
     end
 
     should "know its default eruby class" do
@@ -38,21 +38,34 @@ class Deas::Erubis::Source
       assert_equal @root, subject.root.to_s
     end
 
-    should "default its cache root and eruby class" do
-      assert_equal @root, subject.cache_root.to_s
+    should "default its eruby class" do
       assert_equal Deas::Erubis::Source::DEFAULT_ERUBY, subject.eruby_class
-    end
-
-    should "optionally take a custom cache root" do
-      cache_root = Factory.path
-      source = @source_class.new(@root, :cache_root => cache_root)
-      assert_equal cache_root, source.cache_root
     end
 
     should "optionally take a custom eruby class" do
       eruby = 'some-eruby-class'
       source = @source_class.new(@root, :eruby => eruby)
       assert_equal eruby, source.eruby_class
+    end
+
+    should "default its cache root" do
+      assert_equal Pathname.new('').to_s, subject.cache_root.to_s
+    end
+
+    should "use the root as its cache root if :cache opt is `true`" do
+      source = @source_class.new(@root, :cache => true)
+      assert_equal @root.to_s, source.cache_root.to_s
+    end
+
+    should "optionally use a custom cache root" do
+      source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
+      assert_equal TEMPLATE_CACHE_ROOT.to_s, source.cache_root.to_s
+    end
+
+    should "create the cache root if it doesn't exist already" do
+      FileUtils.rm_rf(TEMPLATE_CACHE_ROOT) if TEMPLATE_CACHE_ROOT.exist?
+      source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
+      assert_file_exists TEMPLATE_CACHE_ROOT.to_s
     end
 
     should "know its context class" do
@@ -80,15 +93,35 @@ class Deas::Erubis::Source
 
   end
 
-  class RenderTests < InitTests
-    desc "`render` method"
+  class RenderSetupTests < InitTests
     setup do
-      @file_name = "basic"
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer
       }
-      @file_path = Factory.template_file("#{@file_name}#{Deas::Erubis::Source::EXT}")
+    end
+    teardown do
+      Dir.glob(TEMPLATE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s).each do |f|
+        FileUtils.rm_f(f)
+      end
+      Dir.glob(TEMPLATE_CACHE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s).each do |f|
+        FileUtils.rm_f(f)
+      end
+    end
+  end
+
+  class RenderTests < RenderSetupTests
+    desc "`render` method"
+    setup do
+      @file_name = "basic"
+    end
+
+  end
+
+  class RenderEnabledCacheTests < RenderTests
+    desc "when caching is enabled"
+    setup do
+      @source = @source_class.new(@root, :cache => true)
     end
 
     should "render a template for the given file name and return its data" do
@@ -96,21 +129,57 @@ class Deas::Erubis::Source
       assert_equal exp, subject.render(@file_name, @file_locals)
     end
 
-    should "cache templates in the source cache root" do
-      cache_file_name = "#{@file_name}#{Deas::Erubis::Source::CACHE_EXT}"
+    should "cache templates in the root (cache root) alongside the source" do
+      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
+      cache_file = subject.root.join(f)
 
-      cache_file = subject.cache_root.join(cache_file_name)
-      cache_file.delete if cache_file.exist?
       assert_not_file_exists cache_file
       subject.render(@file_name, @file_locals)
       assert_file_exists cache_file
+    end
 
-      source = @source_class.new(@root, :cache_root => TEMPLATE_CACHE_ROOT)
-      cache_file = source.cache_root.join(cache_file_name)
-      cache_file.delete if cache_file.exist?
+  end
+
+  class RenderCustomCacheTests < RenderTests
+    desc "when caching is enabled on a custom cache root"
+    setup do
+      @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
+    end
+
+    should "render a template for the given file name and return its data" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, subject.render(@file_name, @file_locals)
+    end
+
+    should "cache templates in the cache root" do
+      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
+      cache_file = TEMPLATE_CACHE_ROOT.join(f)
+
       assert_not_file_exists cache_file
-      source.render(@file_name, @file_locals)
+      subject.render(@file_name, @file_locals)
       assert_file_exists cache_file
+    end
+
+  end
+
+  class RenderNoCacheTests < RenderTests
+    desc "when caching is disabled"
+    setup do
+      @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
+    end
+
+    should "render a template for the given file name and return its data" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, subject.render(@file_name, @file_locals)
+    end
+
+    should "not cache templates" do
+      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
+      cache_file = subject.root.join(f)
+
+      assert_not_file_exists cache_file
+      subject.render(@file_name, @file_locals)
+      assert_not_file_exists cache_file
     end
 
   end

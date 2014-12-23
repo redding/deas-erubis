@@ -1,4 +1,0 @@
-_buf = ''; _buf << '<h1>name: '; _buf << ( name ).to_s; _buf << '</h1>
-<h2>local1: '; _buf << ( local1 ).to_s; _buf << '</h2>
-';
-_buf.to_s
