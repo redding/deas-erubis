@@ -59,10 +59,8 @@ class Deas::Erubis::TemplateEngine
       assert_equal logger_local, engine.erb_logger_local
     end
 
-    should "render erb templates" do
-      engine = Deas::Erubis::TemplateEngine.new({
-        'source_path' => TEMPLATE_ROOT
-      })
+    should "render templates" do
+      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
       view_handler = OpenStruct.new({
         :identifier => Factory.integer,
         :name => Factory.string
@@ -73,15 +71,17 @@ class Deas::Erubis::TemplateEngine
       assert_equal exp, engine.render('view', view_handler, locals)
     end
 
-    should "not implement the engine partial method" do
-      assert_raises NotImplementedError do
-        subject.partial('_partial.erb', {})
-      end
+    should "render partial templates" do
+      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
+      locals = { 'local1' => Factory.string }
+      exp = Factory.partial_erb_rendered(engine, locals).to_s
+
+      assert_equal exp, engine.partial('_partial', locals)
     end
 
     should "not implement the engine capture partial method" do
       assert_raises NotImplementedError do
-        subject.capture_partial('_partial.erb', {})
+        subject.capture_partial('_partial', {})
       end
     end
 

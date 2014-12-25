@@ -23,4 +23,9 @@ module Factory
     "<p>logger: #{engine.logger.to_s}</p>\n"
   end
 
+  def self.partial_erb_rendered(engine, locals)
+    "<h1>local1: #{locals['local1']}</h1>\n"\
+    "<p>logger: #{engine.logger.to_s}</p>\n"
+  end
+
 end
