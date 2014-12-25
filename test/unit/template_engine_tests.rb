@@ -28,16 +28,15 @@ class Deas::Erubis::TemplateEngine
       assert_same subject.erb_source, subject.erb_source
     end
 
-    should "allow custom cache roots on its source" do
-      custom_cache = Factory.path
-      engine = Deas::Erubis::TemplateEngine.new('cache_root' => custom_cache)
-      assert_equal custom_cache, engine.erb_source.cache_root
-    end
-
     should "allow custom eruby classes on its source" do
       custom_eruby = 'some-eruby'
       engine = Deas::Erubis::TemplateEngine.new('eruby' => custom_eruby)
       assert_equal custom_eruby, engine.erb_source.eruby_class
+    end
+
+    should "allow custom cache roots on its source" do
+      engine = Deas::Erubis::TemplateEngine.new('cache' => TEMPLATE_CACHE_ROOT)
+      assert_equal TEMPLATE_CACHE_ROOT.to_s, engine.erb_source.cache_root.to_s
     end
 
     should "use 'view' as the handler local name by default" do

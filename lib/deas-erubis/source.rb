@@ -7,15 +7,45 @@ module Deas::Erubis
   class Source
 
     EXT       = '.erb'.freeze
-    CACHE_EXT = "#{EXT}.cache".freeze
+    CACHE_EXT = '.cache'.freeze
     DEFAULT_ERUBY = ::Erubis::Eruby
 
     attr_reader :root, :cache_root, :eruby_class, :context_class
 
     def initialize(root, opts)
-      @root          = Pathname.new(root.to_s)
-      @cache_root    = opts[:cache_root] || @root
-      @eruby_class   = opts[:eruby] || DEFAULT_ERUBY
+      @root        = Pathname.new(root.to_s)
+      @eruby_class = opts[:eruby] || DEFAULT_ERUBY
+
+      should_cache = !!opts[:cache]
+      @cache_root  = opts[:cache] == true ? @root : Pathname.new(opts[:cache].to_s)
+      @cache_root.mkpath if should_cache && !@cache_root.exist?
+
+      if should_cache
+        # use `load_file` to lookup and cache templates (faster renders)
+        if @cache_root == @root
+          # use the `load_file` default and don't bother with looking up, setting,
+          # and making sure the cache file path exists - by default `load_file`
+          # caches alongside the source with the `CACHE_EXT` appended.
+          add_meta_eruby_method do |file_name|
+            @eruby_class.load_file(source_file_path(file_name))
+          end
+        else
+          # lookup and ensure the custom cache location exists (more expensive)
+          add_meta_eruby_method do |file_name|
+            @eruby_class.load_file(source_file_path(file_name), {
+              :cachename => cache_file_path(file_name)
+            })
+          end
+        end
+      else
+        # don't cache template files (slower renders, but no cache files created)
+        add_meta_eruby_method do |file_name|
+          filename = source_file_path(file_name).to_s
+          template = File.send(File.respond_to?(:binread) ? :binread : :read, filename)
+          @eruby_class.new(template, :filename => filename)
+        end
+      end
+
       @context_class = build_context_class(opts)
     end
 
@@ -32,9 +62,11 @@ module Deas::Erubis
     private
 
     def eruby(file_name)
-      @eruby_class.load_file(source_file_path(file_name), {
-        :cachename => cache_file_path(file_name)
-      })
+      # should be overridden by a metaclass equivalent on init
+      # the implementation changes whether you are caching templates or not
+      # and the goal here is to not add a bunch of conditional overhead as this
+      # will be called on every render
+      raise NotImplementedError
     end
 
     def source_file_path(file_name)
@@ -42,9 +74,16 @@ module Deas::Erubis
     end
 
     def cache_file_path(file_name)
-      self.cache_root.join("#{file_name}#{CACHE_EXT}").tap do |path|
+      self.cache_root.join("#{file_name}#{EXT}#{CACHE_EXT}").tap do |path|
         path.dirname.mkpath if !path.dirname.exist?
       end.to_s
+    end
+
+    def add_meta_eruby_method(&method)
+      metaclass = class << self; self; end
+      metaclass.class_eval do
+        define_method(:eruby, &method)
+      end
     end
 
     def build_context_class(opts)
