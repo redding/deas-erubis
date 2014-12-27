@@ -6,8 +6,9 @@ module Deas::Erubis
 
   class Source
 
-    EXT       = '.erb'.freeze
-    CACHE_EXT = '.cache'.freeze
+    EXT           = '.erb'.freeze
+    CACHE_EXT     = '.cache'.freeze
+    BUFVAR_NAME   = '@_erb_buf'.freeze
     DEFAULT_ERUBY = ::Erubis::Eruby
 
     attr_reader :root, :cache_root, :eruby_class, :context_class
@@ -27,12 +28,15 @@ module Deas::Erubis
           # and making sure the cache file path exists - by default `load_file`
           # caches alongside the source with the `CACHE_EXT` appended.
           add_meta_eruby_method do |file_name|
-            @eruby_class.load_file(source_file_path(file_name))
+            @eruby_class.load_file(source_file_path(file_name), {
+              :bufvar => BUFVAR_NAME
+            })
           end
         else
           # lookup and ensure the custom cache location exists (more expensive)
           add_meta_eruby_method do |file_name|
             @eruby_class.load_file(source_file_path(file_name), {
+              :bufvar    => BUFVAR_NAME,
               :cachename => cache_file_path(file_name)
             })
           end
@@ -42,11 +46,22 @@ module Deas::Erubis
         add_meta_eruby_method do |file_name|
           filename = source_file_path(file_name).to_s
           template = File.send(File.respond_to?(:binread) ? :binread : :read, filename)
-          @eruby_class.new(template, :filename => filename)
+          @eruby_class.new(template, {
+            :bufvar   => BUFVAR_NAME,
+            :filename => filename
+          })
         end
       end
 
       @context_class = build_context_class(opts)
+    end
+
+    def eruby(file_name)
+      # should be overridden by a metaclass equivalent on init
+      # the implementation changes whether you are caching templates or not
+      # and the goal here is to not add a bunch of conditional overhead as this
+      # will be called on every render
+      raise NotImplementedError
     end
 
     def render(file_name, locals)
@@ -60,14 +75,6 @@ module Deas::Erubis
     end
 
     private
-
-    def eruby(file_name)
-      # should be overridden by a metaclass equivalent on init
-      # the implementation changes whether you are caching templates or not
-      # and the goal here is to not add a bunch of conditional overhead as this
-      # will be called on every render
-      raise NotImplementedError
-    end
 
     def source_file_path(file_name)
       self.root.join("#{file_name}#{EXT}").to_s

@@ -17,6 +17,10 @@ class Deas::Erubis::Source
       assert_equal '.cache', subject::CACHE_EXT
     end
 
+    should "know the bufvar name to use" do
+      assert_equal '@_erb_buf', subject::BUFVAR_NAME
+    end
+
     should "know its default eruby class" do
       assert_equal ::Erubis::Eruby, subject::DEFAULT_ERUBY
     end
@@ -32,7 +36,7 @@ class Deas::Erubis::Source
     subject{ @source }
 
     should have_readers :root, :cache_root, :eruby_class, :context_class
-    should have_imeths :render
+    should have_imeths :eruby, :render
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
@@ -46,6 +50,15 @@ class Deas::Erubis::Source
       eruby = 'some-eruby-class'
       source = @source_class.new(@root, :eruby => eruby)
       assert_equal eruby, source.eruby_class
+    end
+
+    should "build eruby instances for a given template file" do
+      assert_kind_of subject.eruby_class, subject.eruby('basic')
+    end
+
+    should "build its eruby instances with the correct bufvar name" do
+      exp = Deas::Erubis::Source::BUFVAR_NAME
+      assert_equal exp, subject.eruby('basic').instance_variable_get('@bufvar')
     end
 
     should "default its cache root" do
