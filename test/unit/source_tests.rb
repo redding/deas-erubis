@@ -90,18 +90,25 @@ class Deas::Erubis::Source
       source = @source_class.new(@root, {
         :default_locals => { local_name => local_val }
       })
-      context = source.context_class.new({})
+      context = source.context_class.new('deas-source', {})
 
       assert_responds_to local_name, context
       assert_equal local_val, context.send(local_name)
     end
 
-    should "apply locals to its context class instances on init" do
+    should "apply custom locals to its context class instances on init" do
       local_name, local_val = [Factory.string, Factory.string]
-      context = subject.context_class.new(local_name => local_val)
+      context = subject.context_class.new('deas-source', local_name => local_val)
 
       assert_responds_to local_name, context
       assert_equal local_val, context.send(local_name)
+    end
+
+    should "set any deas source given to its context class as in ivar on init" do
+      deas_source = 'a-deas-source'
+      context = subject.context_class.new(deas_source, {})
+
+      assert_equal deas_source, context.instance_variable_get('@deas_source')
     end
 
   end
@@ -129,17 +136,29 @@ class Deas::Erubis::Source
       @file_name = "basic"
     end
 
+    should "render a template for the given file name and return its data" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, subject.render(@file_name, @file_locals)
+    end
+
+    should "pass its deas source to its context class" do
+      deas_source = 'a-deas-source'
+      source = @source_class.new(@root, :deas_source => deas_source)
+      context_class = nil
+      Assert.stub(source.context_class, :new) do |s, l|
+        context_class = ContextClassSpy.new(s, l)
+      end
+      source.render(@file_name, @file_locals)
+
+      assert_equal deas_source, context_class.deas_source
+    end
+
   end
 
   class RenderEnabledCacheTests < RenderTests
     desc "when caching is enabled"
     setup do
       @source = @source_class.new(@root, :cache => true)
-    end
-
-    should "render a template for the given file name and return its data" do
-      exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, subject.render(@file_name, @file_locals)
     end
 
     should "cache templates in the root (cache root) alongside the source" do
@@ -159,11 +178,6 @@ class Deas::Erubis::Source
       @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
     end
 
-    should "render a template for the given file name and return its data" do
-      exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, subject.render(@file_name, @file_locals)
-    end
-
     should "cache templates in the cache root" do
       f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
       cache_file = TEMPLATE_CACHE_ROOT.join(f)
@@ -179,11 +193,6 @@ class Deas::Erubis::Source
     desc "when caching is disabled"
     setup do
       @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
-    end
-
-    should "render a template for the given file name and return its data" do
-      exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, subject.render(@file_name, @file_locals)
     end
 
     should "not cache templates" do
@@ -212,6 +221,19 @@ class Deas::Erubis::Source
       assert_equal '/', subject.root.to_s
     end
 
+  end
+
+  class ContextClassSpy
+    attr_reader :deas_source
+    def initialize(deas_source, locals)
+      @deas_source = deas_source
+      metaclass = class << self; self; end
+      metaclass.class_eval do
+        locals.each do |key, value|
+          define_method(key){ value }
+        end
+      end
+    end
   end
 
 end

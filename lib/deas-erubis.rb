@@ -15,6 +15,7 @@ module Deas::Erubis
       @erb_source ||= Source.new(self.source_path, {
         :eruby          => self.opts['eruby'],
         :cache          => self.opts['cache'],
+        :deas_source    => self.opts['deas_template_source'],
         :default_locals => { self.erb_logger_local => self.logger }
       })
     end
