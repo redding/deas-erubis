@@ -53,6 +53,7 @@ module Deas::Erubis
         end
       end
 
+      @deas_source   = opts[:deas_source]
       @context_class = build_context_class(opts)
     end
 
@@ -65,7 +66,7 @@ module Deas::Erubis
     end
 
     def render(file_name, locals)
-      eruby(file_name).evaluate(@context_class.new(locals))
+      eruby(file_name).evaluate(@context_class.new(@deas_source, locals))
     end
 
     def inspect
@@ -95,10 +96,13 @@ module Deas::Erubis
 
     def build_context_class(opts)
       Class.new do
+        # TODO: add in partial helpers to use @deas_source
         # TODO: mixin context helpers? `opts[:template_helpers]`
         (opts[:default_locals] || {}).each{ |k, v| define_method(k){ v } }
 
-        def initialize(locals)
+        def initialize(deas_source, locals)
+          @deas_source = deas_source
+
           metaclass = class << self; self; end
           metaclass.class_eval do
             locals.each do |key, value|

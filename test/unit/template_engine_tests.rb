@@ -39,6 +39,16 @@ class Deas::Erubis::TemplateEngine
       assert_equal TEMPLATE_CACHE_ROOT.to_s, engine.erb_source.cache_root.to_s
     end
 
+    should "pass any given deas template source to its source" do
+      deas_source = 'a-deas-source'
+      source_opts = nil
+
+      Assert.stub(Deas::Erubis::Source, :new){ |root, opts| source_opts = opts }
+      Deas::Erubis::TemplateEngine.new('deas_template_source' => deas_source).erb_source
+
+      assert_equal deas_source, source_opts[:deas_source]
+    end
+
     should "use 'view' as the handler local name by default" do
       assert_equal 'view', subject.erb_handler_local
     end
