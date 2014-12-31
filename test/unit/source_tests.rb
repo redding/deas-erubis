@@ -36,7 +36,7 @@ class Deas::Erubis::Source
     subject{ @source }
 
     should have_readers :root, :cache_root, :eruby_class, :context_class
-    should have_imeths :eruby, :render
+    should have_imeths :eruby, :render, :compile
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
@@ -121,13 +121,12 @@ class Deas::Erubis::Source
       }
     end
     teardown do
-      Dir.glob(TEMPLATE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s).each do |f|
-        FileUtils.rm_f(f)
-      end
-      Dir.glob(TEMPLATE_CACHE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s).each do |f|
-        FileUtils.rm_f(f)
-      end
+      root = TEMPLATE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s
+      Dir.glob(root).each{ |f| FileUtils.rm_f(f) }
+      root = TEMPLATE_CACHE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s
+      Dir.glob(root).each{ |f| FileUtils.rm_f(f) }
     end
+
   end
 
   class RenderTests < RenderSetupTests
@@ -192,7 +191,7 @@ class Deas::Erubis::Source
   class RenderNoCacheTests < RenderTests
     desc "when caching is disabled"
     setup do
-      @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
+      @source = @source_class.new(@root, :cache => false)
     end
 
     should "not cache templates" do
@@ -216,6 +215,17 @@ class Deas::Erubis::Source
     should "render the template for the given file name and return its data" do
       exp = Factory.yield_erb_rendered(@file_locals, &@content)
       assert_equal exp, subject.render(@file_name, @file_locals, &@content)
+    end
+
+  end
+
+  class CompileTests < RenderSetupTests
+    desc "`compile` method"
+
+    should "compile raw content file name and return its data" do
+      raw = "<p><%= 1 + 1 %></p>"
+      exp = "<p>2</p>"
+      assert_equal exp, subject.compile('compile', raw)
     end
 
   end

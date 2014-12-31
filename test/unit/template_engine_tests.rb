@@ -76,8 +76,8 @@ class Deas::Erubis::TemplateEngine
         :name => Factory.string
       })
       locals = { 'local1' => Factory.string }
-      exp = Factory.view_erb_rendered(engine, view_handler, locals).to_s
 
+      exp = Factory.view_erb_rendered(engine, view_handler, locals).to_s
       assert_equal exp, engine.render('view', view_handler, locals)
     end
 
@@ -97,8 +97,8 @@ class Deas::Erubis::TemplateEngine
     should "render partial templates" do
       engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
       locals = { 'local1' => Factory.string }
-      exp = Factory.partial_erb_rendered(engine, locals).to_s
 
+      exp = Factory.partial_erb_rendered(engine, locals).to_s
       assert_equal exp, engine.partial('_partial', locals)
     end
 
@@ -106,6 +106,16 @@ class Deas::Erubis::TemplateEngine
       assert_raises NotImplementedError do
         subject.capture_partial('_partial', {})
       end
+    end
+
+    should "compile raw template markup" do
+      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
+      file_name = 'compile'
+      file_path = TEMPLATE_ROOT.join("#{file_name}#{Deas::Erubis::Source::EXT}").to_s
+      file_content = File.read(file_path)
+
+      exp = Factory.compile_erb_rendered(engine).to_s
+      assert_equal exp, engine.compile(file_name, file_content)
     end
 
   end

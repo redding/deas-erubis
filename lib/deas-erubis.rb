@@ -43,6 +43,10 @@ module Deas::Erubis
       raise NotImplementedError
     end
 
+    def compile(template_name, compiled_content)
+      self.erb_source.compile(template_name, compiled_content)
+    end
+
     private
 
     def render_locals(view_handler, locals)
