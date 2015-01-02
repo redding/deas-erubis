@@ -28,4 +28,22 @@ module Factory
     "<p>logger: #{engine.logger.to_s}</p>\n"
   end
 
+  def self.yield_erb_rendered(locals, &content)
+    "<h1>name: #{locals['name']}</h1>\n"\
+    "<h2>local1: #{locals['local1']}</h2>\n"\
+    "<div>\n"\
+    "  #{content.call}\n"\
+    "</div>\n"
+  end
+
+  def self.yield_view_erb_rendered(engine, view_handler, locals, &content)
+    "<h1>name: #{view_handler.name}</h1>\n"\
+    "<h2>local1: #{locals['local1']}</h2>\n"\
+    "<p>id: #{view_handler.identifier}</p>\n"\
+    "<p>logger: #{engine.logger.to_s}</p>\n"\
+    "<div>\n"\
+    "  #{content.call}\n"\
+    "</div>\n"
+  end
+
 end
