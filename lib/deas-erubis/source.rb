@@ -65,8 +65,8 @@ module Deas::Erubis
       raise NotImplementedError
     end
 
-    def render(file_name, locals)
-      eruby(file_name).evaluate(@context_class.new(@deas_source, locals))
+    def render(file_name, locals, &content)
+      eruby(file_name).evaluate(@context_class.new(@deas_source, locals), &content)
     end
 
     def inspect

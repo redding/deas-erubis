@@ -81,6 +81,19 @@ class Deas::Erubis::TemplateEngine
       assert_equal exp, engine.render('view', view_handler, locals)
     end
 
+    should "render templates yielding to given content blocks" do
+      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
+      view_handler = OpenStruct.new({
+        :identifier => Factory.integer,
+        :name => Factory.string
+      })
+      locals = { 'local1' => Factory.string }
+      content = Proc.new{ "<span>some content</span>" }
+      exp = Factory.yield_view_erb_rendered(engine, view_handler, locals, &content).to_s
+
+      assert_equal exp, engine.render('yield_view', view_handler, locals, &content)
+    end
+
     should "render partial templates" do
       engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
       locals = { 'local1' => Factory.string }

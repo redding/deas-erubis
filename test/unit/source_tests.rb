@@ -206,6 +206,20 @@ class Deas::Erubis::Source
 
   end
 
+  class RenderContentTests < RenderTests
+    desc "when yielding to a given content block"
+    setup do
+      @file_name = "yield"
+      @content = Proc.new{ "<span>some content</span>" }
+    end
+
+    should "render the template for the given file name and return its data" do
+      exp = Factory.yield_erb_rendered(@file_locals, &@content)
+      assert_equal exp, subject.render(@file_name, @file_locals, &@content)
+    end
+
+  end
+
   class DefaultSource < UnitTests
     desc "DefaultSource"
     setup do
