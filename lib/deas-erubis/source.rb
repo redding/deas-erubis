@@ -69,6 +69,13 @@ module Deas::Erubis
       eruby(file_name).evaluate(@context_class.new(@deas_source, locals), &content)
     end
 
+    def compile(file_name, content)
+      @eruby_class.new(content, {
+        :bufvar   => BUFVAR_NAME,
+        :filename => file_name
+      }).evaluate(@context_class.new(@deas_source, {}))
+    end
+
     def inspect
       "#<#{self.class}:#{'0x0%x' % (object_id << 1)}"\
       " @root=#{@root.inspect}"\

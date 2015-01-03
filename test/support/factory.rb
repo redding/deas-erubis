@@ -46,4 +46,10 @@ module Factory
     "</div>\n"
   end
 
+  def self.compile_erb_rendered(engine)
+    "<h1>compile</h1>\n"\
+    "<p>2</p>\n"\
+    "<p>logger: #{engine.logger.to_s}</p>\n"
+  end
+
 end
