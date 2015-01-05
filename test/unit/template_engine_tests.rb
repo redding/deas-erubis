@@ -102,10 +102,39 @@ class Deas::Erubis::TemplateEngine
       assert_equal exp, engine.partial('_partial', locals)
     end
 
-    should "not implement the engine capture partial method" do
-      assert_raises NotImplementedError do
-        subject.capture_partial('_partial', {})
-      end
+    should "render partial templates yielding to given content blocks" do
+      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
+      locals = { 'local1' => Factory.string }
+      content = Proc.new{ "<span>some content</span>" }
+
+      exp = Factory.yield_partial_erb_rendered(engine, locals, &content).to_s
+      assert_equal exp, engine.partial('_yield_partial', locals, &content)
+    end
+
+    should "render templates that render partials" do
+      source_spy = DeasSourceSpy.new
+      engine = Deas::Erubis::TemplateEngine.new({
+        'source_path' => TEMPLATE_ROOT,
+        'deas_template_source' => source_spy
+      })
+      source_spy.engine = engine
+      locals = { 'local1' => Factory.string }
+
+      exp = Factory.partial_with_partial_erb_rendered(engine, locals).to_s
+      assert_equal exp, engine.partial('with_partial', locals)
+    end
+
+    should "render templates that capture render partials" do
+      source_spy = DeasSourceSpy.new
+      engine = Deas::Erubis::TemplateEngine.new({
+        'source_path' => TEMPLATE_ROOT,
+        'deas_template_source' => source_spy
+      })
+      source_spy.engine = engine
+      locals = { 'local1' => Factory.string }
+
+      exp = Factory.partial_with_capture_partial_erb_rendered(engine, locals).to_s
+      assert_equal exp, engine.partial('with_capture_partial', locals)
     end
 
     should "compile raw template markup" do
@@ -116,6 +145,14 @@ class Deas::Erubis::TemplateEngine
 
       exp = Factory.compile_erb_rendered(engine).to_s
       assert_equal exp, engine.compile(file_name, file_content)
+    end
+
+    class DeasSourceSpy
+      attr_accessor :engine
+
+      def partial(*args, &block)
+        self.engine.partial(*args, &block)
+      end
     end
 
   end

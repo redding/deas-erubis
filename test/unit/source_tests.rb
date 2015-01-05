@@ -85,6 +85,14 @@ class Deas::Erubis::Source
       assert_instance_of ::Class, subject.context_class
     end
 
+    should "mixin template helpers to its context class" do
+      assert_includes Deas::Erubis::TemplateHelpers, subject.context_class
+
+      context = subject.context_class.new('deas-source', {})
+      assert_responds_to :partial, context
+      assert_responds_to :capture_partial, context
+    end
+
     should "optionally take and apply default locals to its context class" do
       local_name, local_val = [Factory.string, Factory.string]
       source = @source_class.new(@root, {
