@@ -1,5 +1,6 @@
 require 'pathname'
 require 'erubis'
+require 'deas-erubis/template_helpers'
 
 module Deas; end
 module Deas::Erubis
@@ -103,7 +104,7 @@ module Deas::Erubis
 
     def build_context_class(opts)
       Class.new do
-        # TODO: add in partial helpers to use @deas_source
+        include ::Deas::Erubis::TemplateHelpers
         # TODO: mixin context helpers? `opts[:template_helpers]`
         (opts[:default_locals] || {}).each{ |k, v| define_method(k){ v } }
 

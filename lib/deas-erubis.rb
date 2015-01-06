@@ -1,8 +1,8 @@
 require 'deas/template_engine'
 require 'erubis'
 
-require "deas-erubis/version"
-require "deas-erubis/source"
+require 'deas-erubis/version'
+require 'deas-erubis/source'
 
 module Deas::Erubis
 
@@ -34,13 +34,8 @@ module Deas::Erubis
     end
 
     # render the template against the given locals
-    def partial(template_name, locals)
-      self.erb_source.render(template_name, locals)
-    end
-
-    def capture_partial(template_name, locals, &content)
-      # TODO: render template with given locals yielding to given content
-      raise NotImplementedError
+    def partial(template_name, locals, &content)
+      self.erb_source.render(template_name, locals, &content)
     end
 
     def compile(template_name, compiled_content)
