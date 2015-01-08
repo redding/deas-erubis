@@ -16,7 +16,7 @@ class Deas::Erubis::TemplateEngine
     subject{ @engine }
 
     should have_imeths :erb_source, :erb_handler_local, :erb_logger_local
-    should have_imeths :render, :partial, :capture_partial
+    should have_imeths :render, :partial
 
     should "be a Deas template engine" do
       assert_kind_of Deas::TemplateEngine, subject
@@ -67,92 +67,6 @@ class Deas::Erubis::TemplateEngine
       logger_local = Factory.string
       engine = Deas::Erubis::TemplateEngine.new('logger_local' => logger_local)
       assert_equal logger_local, engine.erb_logger_local
-    end
-
-    should "render templates" do
-      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
-      view_handler = OpenStruct.new({
-        :identifier => Factory.integer,
-        :name => Factory.string
-      })
-      locals = { 'local1' => Factory.string }
-
-      exp = Factory.view_erb_rendered(engine, view_handler, locals).to_s
-      assert_equal exp, engine.render('view', view_handler, locals)
-    end
-
-    should "render templates yielding to given content blocks" do
-      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
-      view_handler = OpenStruct.new({
-        :identifier => Factory.integer,
-        :name => Factory.string
-      })
-      locals = { 'local1' => Factory.string }
-      content = Proc.new{ "<span>some content</span>" }
-      exp = Factory.yield_view_erb_rendered(engine, view_handler, locals, &content).to_s
-
-      assert_equal exp, engine.render('yield_view', view_handler, locals, &content)
-    end
-
-    should "render partial templates" do
-      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
-      locals = { 'local1' => Factory.string }
-
-      exp = Factory.partial_erb_rendered(engine, locals).to_s
-      assert_equal exp, engine.partial('_partial', locals)
-    end
-
-    should "render partial templates yielding to given content blocks" do
-      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
-      locals = { 'local1' => Factory.string }
-      content = Proc.new{ "<span>some content</span>" }
-
-      exp = Factory.yield_partial_erb_rendered(engine, locals, &content).to_s
-      assert_equal exp, engine.partial('_yield_partial', locals, &content)
-    end
-
-    should "render templates that render partials" do
-      source_spy = DeasSourceSpy.new
-      engine = Deas::Erubis::TemplateEngine.new({
-        'source_path' => TEMPLATE_ROOT,
-        'deas_template_source' => source_spy
-      })
-      source_spy.engine = engine
-      locals = { 'local1' => Factory.string }
-
-      exp = Factory.partial_with_partial_erb_rendered(engine, locals).to_s
-      assert_equal exp, engine.partial('with_partial', locals)
-    end
-
-    should "render templates that capture render partials" do
-      source_spy = DeasSourceSpy.new
-      engine = Deas::Erubis::TemplateEngine.new({
-        'source_path' => TEMPLATE_ROOT,
-        'deas_template_source' => source_spy
-      })
-      source_spy.engine = engine
-      locals = { 'local1' => Factory.string }
-
-      exp = Factory.partial_with_capture_partial_erb_rendered(engine, locals).to_s
-      assert_equal exp, engine.partial('with_capture_partial', locals)
-    end
-
-    should "compile raw template markup" do
-      engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
-      file_name = 'compile'
-      file_path = TEMPLATE_ROOT.join("#{file_name}#{Deas::Erubis::Source::EXT}").to_s
-      file_content = File.read(file_path)
-
-      exp = Factory.compile_erb_rendered(engine).to_s
-      assert_equal exp, engine.compile(file_name, file_content)
-    end
-
-    class DeasSourceSpy
-      attr_accessor :engine
-
-      def partial(*args, &block)
-        self.engine.partial(*args, &block)
-      end
     end
 
   end
