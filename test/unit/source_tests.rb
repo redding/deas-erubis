@@ -12,9 +12,8 @@ class Deas::Erubis::Source
     end
     subject{ @source_class }
 
-    should "know its extensions" do
+    should "know its extension" do
       assert_equal '.erb',   subject::EXT
-      assert_equal '.cache', subject::CACHE_EXT
     end
 
     should "know the bufvar name to use" do
@@ -35,8 +34,8 @@ class Deas::Erubis::Source
     end
     subject{ @source }
 
-    should have_readers :root, :cache_root, :eruby_class, :context_class
-    should have_imeths :eruby, :render, :compile
+    should have_readers :root, :eruby_class, :cache, :context_class
+    should have_imeths :render, :compile, :eruby
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
@@ -53,32 +52,23 @@ class Deas::Erubis::Source
     end
 
     should "build eruby instances for a given template file" do
-      assert_kind_of subject.eruby_class, subject.eruby('basic')
+      assert_kind_of subject.eruby_class, subject.eruby('basic', Factory.string)
     end
 
     should "build its eruby instances with the correct bufvar name" do
+      eruby = subject.eruby('basic', Factory.string)
+
       exp = Deas::Erubis::Source::BUFVAR_NAME
-      assert_equal exp, subject.eruby('basic').instance_variable_get('@bufvar')
+      assert_equal exp, eruby.instance_variable_get('@bufvar')
     end
 
-    should "default its cache root" do
-      assert_equal Pathname.new('').to_s, subject.cache_root.to_s
+    should "not cache templates by default" do
+      assert_kind_of NullCache, subject.cache
     end
 
-    should "use the root as its cache root if :cache opt is `true`" do
+    should "cache templates if the :cache opt is `true`" do
       source = @source_class.new(@root, :cache => true)
-      assert_equal @root.to_s, source.cache_root.to_s
-    end
-
-    should "optionally use a custom cache root" do
-      source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
-      assert_equal TEMPLATE_CACHE_ROOT.to_s, source.cache_root.to_s
-    end
-
-    should "create the cache root if it doesn't exist already" do
-      FileUtils.rm_rf(TEMPLATE_CACHE_ROOT) if TEMPLATE_CACHE_ROOT.exist?
-      source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
-      assert_file_exists TEMPLATE_CACHE_ROOT.to_s
+      assert_kind_of Hash, source.cache
     end
 
     should "know its context class" do
@@ -121,26 +111,14 @@ class Deas::Erubis::Source
 
   end
 
-  class RenderSetupTests < InitTests
+  class RenderTests < InitTests
+    desc "`render` method"
     setup do
+      @file_name   = "basic"
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer
       }
-    end
-    teardown do
-      root = TEMPLATE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s
-      Dir.glob(root).each{ |f| FileUtils.rm_f(f) }
-      root = TEMPLATE_CACHE_ROOT.join("*#{@source_class::CACHE_EXT}").to_s
-      Dir.glob(root).each{ |f| FileUtils.rm_f(f) }
-    end
-
-  end
-
-  class RenderTests < RenderSetupTests
-    desc "`render` method"
-    setup do
-      @file_name = "basic"
     end
 
     should "render a template for the given file name and return its data" do
@@ -162,36 +140,18 @@ class Deas::Erubis::Source
 
   end
 
-  class RenderEnabledCacheTests < RenderTests
+  class RenderCacheTests < RenderTests
     desc "when caching is enabled"
     setup do
       @source = @source_class.new(@root, :cache => true)
     end
 
-    should "cache templates in the root (cache root) alongside the source" do
-      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
-      cache_file = subject.root.join(f)
+    should "cache template eruby instances by their file name" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, @source.render(@file_name, @file_locals)
 
-      assert_not_file_exists cache_file
-      subject.render(@file_name, @file_locals)
-      assert_file_exists cache_file
-    end
-
-  end
-
-  class RenderCustomCacheTests < RenderTests
-    desc "when caching is enabled on a custom cache root"
-    setup do
-      @source = @source_class.new(@root, :cache => TEMPLATE_CACHE_ROOT)
-    end
-
-    should "cache templates in the cache root" do
-      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
-      cache_file = TEMPLATE_CACHE_ROOT.join(f)
-
-      assert_not_file_exists cache_file
-      subject.render(@file_name, @file_locals)
-      assert_file_exists cache_file
+      assert_equal [@file_name], @source.cache.keys
+      assert_kind_of @source.eruby_class, @source.cache[@file_name]
     end
 
   end
@@ -202,13 +162,11 @@ class Deas::Erubis::Source
       @source = @source_class.new(@root, :cache => false)
     end
 
-    should "not cache templates" do
-      f = "#{@file_name}#{@source_class::EXT}#{@source_class::CACHE_EXT}"
-      cache_file = subject.root.join(f)
+    should "not cache template eruby instances" do
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, @source.render(@file_name, @file_locals)
 
-      assert_not_file_exists cache_file
-      subject.render(@file_name, @file_locals)
-      assert_not_file_exists cache_file
+      assert_equal [], @source.cache.keys
     end
 
   end
@@ -227,7 +185,7 @@ class Deas::Erubis::Source
 
   end
 
-  class CompileTests < RenderSetupTests
+  class CompileTests < InitTests
     desc "`compile` method"
 
     should "compile raw content file name and return its data" do
@@ -238,15 +196,40 @@ class Deas::Erubis::Source
 
   end
 
-  class DefaultSource < UnitTests
-    desc "DefaultSource"
+  class NullCacheTests < UnitTests
+    desc "NullCache"
+    setup do
+      @cache = NullCache.new
+    end
+    subject{ @cache }
+
+    should have_imeths :[], :[]=, :keys
+
+    should "take a file name and return nothing on index" do
+      assert_nil subject[Factory.path]
+    end
+
+    should "take a file name and value and do nothing on index write" do
+      assert_nothing_raised do
+        subject[Factory.path] = Factory.string
+      end
+    end
+
+    should "always have empty keys" do
+      assert_equal [], subject.keys
+    end
+
+  end
+
+  class DefaultSourceTests < Assert::Context
+    desc "Deas::Erubis::DefaultSource"
     setup do
       @source = Deas::Erubis::DefaultSource.new
     end
     subject{ @source }
 
     should "be a Source" do
-      assert_kind_of @source_class, subject
+      assert_kind_of Deas::Erubis::Source, subject
     end
 
     should "use `/` as its root" do
