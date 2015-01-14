@@ -102,7 +102,7 @@ class Deas::Erubis::Source
       assert_equal local_val, context.send(local_name)
     end
 
-    should "set any deas source given to its context class as in ivar on init" do
+    should "set any deas source given to its context class as an ivar on init" do
       deas_source = 'a-deas-source'
       context = subject.context_class.new(deas_source, {})
 
