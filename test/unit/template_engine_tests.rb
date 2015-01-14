@@ -34,9 +34,9 @@ class Deas::Erubis::TemplateEngine
       assert_equal custom_eruby, engine.erb_source.eruby_class
     end
 
-    should "allow custom cache roots on its source" do
-      engine = Deas::Erubis::TemplateEngine.new('cache' => TEMPLATE_CACHE_ROOT)
-      assert_equal TEMPLATE_CACHE_ROOT.to_s, engine.erb_source.cache_root.to_s
+    should "pass any given cache option to its source" do
+      engine = Deas::Erubis::TemplateEngine.new('cache' => true)
+      assert_kind_of Hash, engine.erb_source.cache
     end
 
     should "pass any given deas template source to its source" do
