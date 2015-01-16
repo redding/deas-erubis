@@ -81,6 +81,8 @@ class Deas::Erubis::Source
       context = subject.context_class.new('deas-source', {})
       assert_responds_to :partial, context
       assert_responds_to :capture_partial, context
+      assert_responds_to :source_partial, context
+      assert_responds_to :source_capture_partial, context
     end
 
     should "optionally take and apply default locals to its context class" do

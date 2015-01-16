@@ -11,12 +11,20 @@ module Deas::Erubis
 
     module Methods
 
-      def partial(n, l = nil)
-        @deas_source.partial(n, l || {})
+      def partial(name, locals = nil)
+        source_partial(@deas_source, name, locals)
       end
 
-      def capture_partial(n, l = nil, &c)
-        _erb_buffer @deas_source.partial(n, l || {}, &Proc.new{ _erb_capture(&c) })
+      def capture_partial(name, locals = nil, &c)
+        source_capture_partial(@deas_source, name, locals, &c)
+      end
+
+      def source_partial(source, name, locals = nil)
+        source.partial(name, locals || {})
+      end
+
+      def source_capture_partial(source, name, locals = nil, &c)
+        _erb_buffer source.partial(name, locals || {}, &Proc.new{ _erb_capture(&c) })
       end
 
       private
