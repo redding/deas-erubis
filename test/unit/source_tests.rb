@@ -86,7 +86,7 @@ class Deas::Erubis::Source
     should "optionally take and apply default locals to its context class" do
       local_name, local_val = [Factory.string, Factory.string]
       source = @source_class.new(@root, {
-        :default_locals => { local_name => local_val }
+        :locals => { local_name => local_val }
       })
       context = source.context_class.new('deas-source', {})
 
