@@ -4,4 +4,5 @@
   <% end %>
   <% capture_partial '_partial', 'local1' => local1 %>
   <% capture_partial '_partial_no_locals' %>
+  <% source_capture_partial @deas_source, '_partial_no_locals' %>
 </div>

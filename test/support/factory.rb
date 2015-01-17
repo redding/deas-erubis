@@ -59,6 +59,7 @@ module Factory
     "  <h1>local1: #{locals['local1']}</h1>\n"\
     "<p>logger: #{engine.logger.to_s}</p>\n\n"\
     "  <span>No locals!</span>\n\n"\
+    "  <span>No locals!</span>\n\n"\
     "</div>\n"
   end
 
@@ -73,6 +74,7 @@ module Factory
     "</div>\n"\
     "<h1>local1: #{locals['local1']}</h1>\n"\
     "<p>logger: #{engine.logger.to_s}</p>\n"\
+    "<span>No locals!</span>\n"\
     "<span>No locals!</span>\n"\
     "</div>\n"
   end
