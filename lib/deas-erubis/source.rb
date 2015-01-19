@@ -60,8 +60,8 @@ module Deas::Erubis
     def build_context_class(opts)
       Class.new do
         include ::Deas::Erubis::TemplateHelpers
-        # TODO: mixin context helpers? `opts[:template_helpers]`
-        (opts[:locals] || {}).each{ |k, v| define_method(k){ v } }
+        (opts[:helpers] || []).each{ |helper| include helper }
+        (opts[:locals]  || {}).each{ |k, v| define_method(k){ v } }
 
         def initialize(deas_source, locals)
           @deas_source = deas_source

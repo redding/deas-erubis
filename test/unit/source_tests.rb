@@ -85,6 +85,15 @@ class Deas::Erubis::Source
       assert_responds_to :source_capture_partial, context
     end
 
+    should "mixin custom template helpers to its context class" do
+      source = @source_class.new(@root, :helpers => [SomeCustomHelpers])
+
+      assert_includes SomeCustomHelpers, source.context_class
+
+      context = source.context_class.new('deas-source', {})
+      assert_responds_to :a_custom_method, context
+    end
+
     should "optionally take and apply default locals to its context class" do
       local_name, local_val = [Factory.string, Factory.string]
       source = @source_class.new(@root, {
@@ -251,6 +260,10 @@ class Deas::Erubis::Source
         end
       end
     end
+  end
+
+  module SomeCustomHelpers
+    def a_custom_method; end
   end
 
 end
