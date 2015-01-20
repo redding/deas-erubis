@@ -49,6 +49,11 @@ class Deas::Erubis::TemplateEngine
       assert_equal deas_source, source_opts[:deas_source]
     end
 
+    should "pass any given helpers option to its source" do
+      engine = Deas::Erubis::TemplateEngine.new('helpers' => [SomeCustomHelpers])
+      assert_includes SomeCustomHelpers, engine.erb_source.context_class
+    end
+
     should "use 'view' as the handler local name by default" do
       assert_equal 'view', subject.erb_handler_local
     end
@@ -69,6 +74,10 @@ class Deas::Erubis::TemplateEngine
       assert_equal logger_local, engine.erb_logger_local
     end
 
+  end
+
+  module SomeCustomHelpers
+    def a_custom_method; end
   end
 
 end
