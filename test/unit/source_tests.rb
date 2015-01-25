@@ -86,8 +86,10 @@ class Deas::Erubis::Source
     end
 
     should "mixin custom template helpers to its context class" do
-      source = @source_class.new(@root, :helpers => [SomeCustomHelpers])
+      source = @source_class.new(@root, :helpers => SomeCustomHelpers)
+      assert_includes SomeCustomHelpers, source.context_class
 
+      source = @source_class.new(@root, :helpers => [SomeCustomHelpers])
       assert_includes SomeCustomHelpers, source.context_class
 
       context = source.context_class.new('deas-source', {})
