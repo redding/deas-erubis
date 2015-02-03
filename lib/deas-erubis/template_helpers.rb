@@ -12,11 +12,11 @@ module Deas::Erubis
     module Methods
 
       def partial(name, locals = nil)
-        source_partial(@deas_source, name, locals)
+        source_partial(@default_source, name, locals)
       end
 
       def capture_partial(name, locals = nil, &c)
-        source_capture_partial(@deas_source, name, locals, &c)
+        source_capture_partial(@default_source, name, locals, &c)
       end
 
       def source_partial(source, name, locals = nil)

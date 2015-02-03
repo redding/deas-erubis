@@ -40,13 +40,13 @@ class Deas::Erubis::TemplateEngine
     end
 
     should "pass any given deas template source to its source" do
-      deas_source = 'a-deas-source'
+      default_source = 'a-default-source'
       source_opts = nil
 
       Assert.stub(Deas::Erubis::Source, :new){ |root, opts| source_opts = opts }
-      Deas::Erubis::TemplateEngine.new('deas_template_source' => deas_source).erb_source
+      Deas::Erubis::TemplateEngine.new('default_template_source' => default_source).erb_source
 
-      assert_equal deas_source, source_opts[:deas_source]
+      assert_equal default_source, source_opts[:default_source]
     end
 
     should "pass any given helpers option to its source" do

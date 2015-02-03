@@ -53,10 +53,10 @@ class Deas::Erubis::TemplateEngine
   class TemplateHelperTests < SystemTests
     desc "template helpers"
     setup do
-      @deas_source = Deas::TemplateSource.new(TEMPLATE_ROOT).tap do |s|
+      @source = Deas::TemplateSource.new(TEMPLATE_ROOT).tap do |s|
         s.engine 'erb', Deas::Erubis::TemplateEngine
       end
-      @engine = @deas_source.engines['erb']
+      @engine = @source.engines['erb']
     end
 
     should "render partials" do
