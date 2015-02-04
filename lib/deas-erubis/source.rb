@@ -27,14 +27,14 @@ module Deas::Erubis
     end
 
     def compile(filename, content)
-      eruby(filename, content).evaluate(@context_class.new(@default_source, {}))
+      template(filename, content).evaluate(@context_class.new(@default_source, {}))
     end
 
-    def eruby(filename, content)
-      @eruby_class.new(content, {
+    def template(filename, content)
+      Template.new(@eruby_class.new(content, {
         :bufvar   => BUFVAR_NAME,
         :filename => filename
-      })
+      }))
     end
 
     def inspect
@@ -49,7 +49,7 @@ module Deas::Erubis
       @cache[file_name] ||= begin
         filename = source_file_path(file_name).to_s
         content = File.send(File.respond_to?(:binread) ? :binread : :read, filename)
-        eruby(filename, content)
+        template(filename, content)
       end
     end
 
@@ -73,6 +73,21 @@ module Deas::Erubis
             end
           end
         end
+      end
+    end
+
+    class Template
+      attr_reader :src, :filename, :eruby_class, :eruby_bufvar
+
+      def initialize(erubis_eruby)
+        @src          = erubis_eruby.src
+        @filename     = erubis_eruby.filename
+        @eruby_class  = erubis_eruby.class
+        @eruby_bufvar = erubis_eruby.instance_variable_get('@bufvar')
+      end
+
+      def evaluate(context)
+        context.instance_eval(@src, @filename)
       end
     end
 

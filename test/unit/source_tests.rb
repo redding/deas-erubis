@@ -35,7 +35,7 @@ class Deas::Erubis::Source
     subject{ @source }
 
     should have_readers :root, :eruby_class, :cache, :context_class
-    should have_imeths :render, :compile, :eruby
+    should have_imeths :render, :compile, :template
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
@@ -51,15 +51,13 @@ class Deas::Erubis::Source
       assert_equal eruby, source.eruby_class
     end
 
-    should "build eruby instances for a given template file" do
-      assert_kind_of subject.eruby_class, subject.eruby('basic', Factory.string)
-    end
+    should "build template objects for template files" do
+      filename = 'basic'
+      template = subject.template(filename, Factory.string)
 
-    should "build its eruby instances with the correct bufvar name" do
-      eruby = subject.eruby('basic', Factory.string)
-
-      exp = Deas::Erubis::Source::BUFVAR_NAME
-      assert_equal exp, eruby.instance_variable_get('@bufvar')
+      assert_equal filename,                          template.filename
+      assert_equal subject.eruby_class,               template.eruby_class
+      assert_equal Deas::Erubis::Source::BUFVAR_NAME, template.eruby_bufvar
     end
 
     should "not cache templates by default" do
@@ -159,12 +157,12 @@ class Deas::Erubis::Source
       @source = @source_class.new(@root, :cache => true)
     end
 
-    should "cache template eruby instances by their file name" do
+    should "cache templates by their file name" do
       exp = Factory.basic_erb_rendered(@file_locals)
       assert_equal exp, @source.render(@file_name, @file_locals)
 
       assert_equal [@file_name], @source.cache.keys
-      assert_kind_of @source.eruby_class, @source.cache[@file_name]
+      assert_kind_of Template, @source.cache[@file_name]
     end
 
   end
@@ -175,7 +173,7 @@ class Deas::Erubis::Source
       @source = @source_class.new(@root, :cache => false)
     end
 
-    should "not cache template eruby instances" do
+    should "not cache templates" do
       exp = Factory.basic_erb_rendered(@file_locals)
       assert_equal exp, @source.render(@file_name, @file_locals)
 
