@@ -13,11 +13,11 @@ module Deas::Erubis
 
     def erb_source
       @erb_source ||= Source.new(self.source_path, {
-        :eruby       => self.opts['eruby'],
-        :cache       => self.opts['cache'],
-        :deas_source => self.opts['deas_template_source'],
-        :helpers     => self.opts['helpers'],
-        :locals      => { self.erb_logger_local => self.logger }
+        :eruby          => self.opts['eruby'],
+        :cache          => self.opts['cache'],
+        :default_source => self.opts['default_template_source'],
+        :helpers        => self.opts['helpers'],
+        :locals         => { self.erb_logger_local => self.logger }
       })
     end
 

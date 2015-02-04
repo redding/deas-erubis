@@ -19,15 +19,15 @@ module Deas::Erubis
       @cache         = opts[:cache] ? Hash.new : NullCache.new
       @context_class = build_context_class(opts)
 
-      @deas_source = opts[:deas_source]
+      @default_source = opts[:default_source]
     end
 
     def render(file_name, locals, &content)
-      load(file_name).evaluate(@context_class.new(@deas_source, locals), &content)
+      load(file_name).evaluate(@context_class.new(@default_source, locals), &content)
     end
 
     def compile(filename, content)
-      eruby(filename, content).evaluate(@context_class.new(@deas_source, {}))
+      eruby(filename, content).evaluate(@context_class.new(@default_source, {}))
     end
 
     def eruby(filename, content)
@@ -63,8 +63,8 @@ module Deas::Erubis
         [*(opts[:helpers] || [])].each{ |helper| include helper }
         (opts[:locals]  || {}).each{ |k, v| define_method(k){ v } }
 
-        def initialize(deas_source, locals)
-          @deas_source = deas_source
+        def initialize(default_source, locals)
+          @default_source = default_source
 
           metaclass = class << self; self; end
           metaclass.class_eval do

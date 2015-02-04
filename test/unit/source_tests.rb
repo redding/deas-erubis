@@ -115,11 +115,11 @@ class Deas::Erubis::Source
       assert_equal local_val, context.send(local_name)
     end
 
-    should "set any deas source given to its context class as an ivar on init" do
-      deas_source = 'a-deas-source'
-      context = subject.context_class.new(deas_source, {})
+    should "set any default source given to its context class as an ivar on init" do
+      default_source = 'a-default-source'
+      context = subject.context_class.new(default_source, {})
 
-      assert_equal deas_source, context.instance_variable_get('@deas_source')
+      assert_equal default_source, context.instance_variable_get('@default_source')
     end
 
   end
@@ -139,16 +139,16 @@ class Deas::Erubis::Source
       assert_equal exp, subject.render(@file_name, @file_locals)
     end
 
-    should "pass its deas source to its context class" do
-      deas_source = 'a-deas-source'
-      source = @source_class.new(@root, :deas_source => deas_source)
+    should "pass its default source to its context class" do
+      default_source = 'a-deas-source'
+      source = @source_class.new(@root, :default_source => default_source)
       context_class = nil
       Assert.stub(source.context_class, :new) do |s, l|
         context_class = ContextClassSpy.new(s, l)
       end
       source.render(@file_name, @file_locals)
 
-      assert_equal deas_source, context_class.deas_source
+      assert_equal default_source, context_class.default_source
     end
 
   end
@@ -252,9 +252,9 @@ class Deas::Erubis::Source
   end
 
   class ContextClassSpy
-    attr_reader :deas_source
-    def initialize(deas_source, locals)
-      @deas_source = deas_source
+    attr_reader :default_source
+    def initialize(default_source, locals)
+      @default_source = default_source
       metaclass = class << self; self; end
       metaclass.class_eval do
         locals.each do |key, value|
