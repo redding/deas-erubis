@@ -1,13 +1,13 @@
+require 'much-plugin'
 require 'deas-erubis/source'
 
 module Deas; end
 module Deas::Erubis
 
   module TemplateHelpers
+    include MuchPlugin
 
-    def self.included(receiver)
-      receiver.class_eval{ include Methods }
-    end
+    plugin_included{ include Methods }
 
     module Methods
 
