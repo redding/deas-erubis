@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version     = Deas::Erubis::VERSION
   gem.authors     = ["Kelly Redding", "Collin Redding"]
   gem.email       = ["kelly@kellyredding.com", "collin.redding@me.com"]
-  gem.description = %q{Deas template engine for rendering erb templates using Erubis}
   gem.summary     = %q{Deas template engine for rendering erb templates using Erubis}
+  gem.description = %q{Deas template engine for rendering erb templates using Erubis}
   gem.homepage    = "http://github.com/redding/deas-erubis"
   gem.license     = 'MIT'
 
@@ -18,10 +18,10 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert", ["~> 2.15"])
+  gem.add_development_dependency("assert", ["~> 2.15.1"])
 
-  gem.add_dependency("deas",        ["~> 0.39"])
+  gem.add_dependency("deas",        ["~> 0.39.1"])
   gem.add_dependency("erubis")
-  gem.add_dependency("much-plugin", ["~> 0.1"])
+  gem.add_dependency("much-plugin", ["~> 0.1.0"])
 
 end
