@@ -54,7 +54,7 @@ module Deas::Erubis
     end
 
     def source_file_path(file_name)
-      self.root.join("#{file_name}#{EXT}").to_s
+      Dir.glob(self.root.join("#{file_name}*#{EXT}")).first
     end
 
     def build_context_class(opts)

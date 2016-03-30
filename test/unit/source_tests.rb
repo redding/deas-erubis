@@ -125,7 +125,7 @@ class Deas::Erubis::Source
   class RenderTests < InitTests
     desc "`render` method"
     setup do
-      @file_name   = "basic"
+      @file_name   = ["basic", "basic.html"].choice
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer
