@@ -40,12 +40,12 @@ class Deas::Erubis::TemplateEngine
     end
 
     should "compile raw template markup" do
-      file_name = 'compile'
-      file_path = TEMPLATE_ROOT.join("#{file_name}#{Deas::Erubis::Source::EXT}").to_s
+      template_name = 'compile'
+      file_path = TEMPLATE_ROOT.join("#{template_name}#{Deas::Erubis::Source::EXT}").to_s
       file_content = File.read(file_path)
 
       exp = Factory.compile_erb_rendered(subject)
-      assert_equal exp, subject.compile(file_name, file_content)
+      assert_equal exp, subject.compile(template_name, file_content)
     end
 
   end

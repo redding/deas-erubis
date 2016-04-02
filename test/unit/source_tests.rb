@@ -125,16 +125,16 @@ class Deas::Erubis::Source
   class RenderTests < InitTests
     desc "`render` method"
     setup do
-      @file_name   = ["basic", "basic.html"].choice
+      @template_name   = ["basic", "basic.html"].choice
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer
       }
     end
 
-    should "render a template for the given file name and return its data" do
+    should "render a template for the given template name and return its data" do
       exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, subject.render(@file_name, @file_locals)
+      assert_equal exp, subject.render(@template_name, @file_locals)
     end
 
     should "pass its default source to its context class" do
@@ -144,7 +144,7 @@ class Deas::Erubis::Source
       Assert.stub(source.context_class, :new) do |s, l|
         context_class = ContextClassSpy.new(s, l)
       end
-      source.render(@file_name, @file_locals)
+      source.render(@template_name, @file_locals)
 
       assert_equal default_source, context_class.default_source
     end
@@ -157,12 +157,12 @@ class Deas::Erubis::Source
       @source = @source_class.new(@root, :cache => true)
     end
 
-    should "cache templates by their file name" do
+    should "cache templates by their template name" do
       exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, @source.render(@file_name, @file_locals)
+      assert_equal exp, @source.render(@template_name, @file_locals)
 
-      assert_equal [@file_name], @source.cache.keys
-      assert_kind_of Template, @source.cache[@file_name]
+      assert_equal [@template_name], @source.cache.keys
+      assert_kind_of Template, @source.cache[@template_name]
     end
 
   end
@@ -175,7 +175,7 @@ class Deas::Erubis::Source
 
     should "not cache templates" do
       exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, @source.render(@file_name, @file_locals)
+      assert_equal exp, @source.render(@template_name, @file_locals)
 
       assert_equal [], @source.cache.keys
     end
@@ -185,13 +185,13 @@ class Deas::Erubis::Source
   class RenderContentTests < RenderTests
     desc "when yielding to a given content block"
     setup do
-      @file_name = "yield"
+      @template_name = "yield"
       @content = Proc.new{ "<span>some content</span>" }
     end
 
-    should "render the template for the given file name and return its data" do
+    should "render the template for the given template name and return its data" do
       exp = Factory.yield_erb_rendered(@file_locals, &@content)
-      assert_equal exp, subject.render(@file_name, @file_locals, &@content)
+      assert_equal exp, subject.render(@template_name, @file_locals, &@content)
     end
 
   end
@@ -199,7 +199,7 @@ class Deas::Erubis::Source
   class CompileTests < InitTests
     desc "`compile` method"
 
-    should "compile raw content file name and return its data" do
+    should "evaluate raw template output and return it" do
       raw = "<p><%= 1 + 1 %></p>"
       exp = "<p>2</p>"
       assert_equal exp, subject.compile('compile', raw)
@@ -216,11 +216,11 @@ class Deas::Erubis::Source
 
     should have_imeths :[], :[]=, :keys
 
-    should "take a file name and return nothing on index" do
+    should "take a template name and return nothing on index" do
       assert_nil subject[Factory.path]
     end
 
-    should "take a file name and value and do nothing on index write" do
+    should "take a template name and value and do nothing on index write" do
       assert_nothing_raised do
         subject[Factory.path] = Factory.string
       end

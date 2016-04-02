@@ -22,12 +22,12 @@ module Deas::Erubis
       @default_source = opts[:default_source]
     end
 
-    def render(file_name, locals, &content)
-      load(file_name).evaluate(@context_class.new(@default_source, locals), &content)
+    def render(template_name, locals, &content)
+      load(template_name).evaluate(@context_class.new(@default_source, locals), &content)
     end
 
-    def compile(filename, content)
-      template(filename, content).evaluate(@context_class.new(@default_source, {}))
+    def compile(template_name, content)
+      template(template_name, content).evaluate(@context_class.new(@default_source, {}))
     end
 
     def template(filename, content)
@@ -45,16 +45,16 @@ module Deas::Erubis
 
     private
 
-    def load(file_name)
-      @cache[file_name] ||= begin
-        filename = source_file_path(file_name).to_s
+    def load(template_name)
+      @cache[template_name] ||= begin
+        filename = source_file_path(template_name).to_s
         content = File.send(File.respond_to?(:binread) ? :binread : :read, filename)
         template(filename, content)
       end
     end
 
-    def source_file_path(file_name)
-      Dir.glob(self.root.join("#{file_name}*#{EXT}")).first
+    def source_file_path(template_name)
+      Dir.glob(self.root.join("#{template_name}*#{EXT}")).first
     end
 
     def build_context_class(opts)
@@ -92,9 +92,9 @@ module Deas::Erubis
     end
 
     class NullCache
-      def [](file_name);         end
-      def []=(file_name, value); end
-      def keys; [];              end
+      def [](template_name);         end
+      def []=(template_name, value); end
+      def keys; [];                  end
     end
 
   end
