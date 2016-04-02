@@ -7,7 +7,6 @@ module Deas::Erubis
 
   class Source
 
-    EXT           = '.erb'.freeze
     BUFVAR_NAME   = '@_erb_buf'.freeze
     DEFAULT_ERUBY = ::Erubis::Eruby
 
@@ -54,7 +53,7 @@ module Deas::Erubis
     end
 
     def source_file_path(template_name)
-      Dir.glob(self.root.join("#{template_name}*#{EXT}")).first
+      Dir.glob(self.root.join("#{template_name}*")).first
     end
 
     def build_context_class(opts)
