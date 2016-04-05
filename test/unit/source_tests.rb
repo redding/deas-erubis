@@ -12,10 +12,6 @@ class Deas::Erubis::Source
     end
     subject{ @source_class }
 
-    should "know its extension" do
-      assert_equal '.erb',   subject::EXT
-    end
-
     should "know the bufvar name to use" do
       assert_equal '@_erb_buf', subject::BUFVAR_NAME
     end
@@ -49,15 +45,6 @@ class Deas::Erubis::Source
       eruby = 'some-eruby-class'
       source = @source_class.new(@root, :eruby => eruby)
       assert_equal eruby, source.eruby_class
-    end
-
-    should "build template objects for template files" do
-      filename = 'basic'
-      template = subject.template(filename, Factory.string)
-
-      assert_equal filename,                          template.filename
-      assert_equal subject.eruby_class,               template.eruby_class
-      assert_equal Deas::Erubis::Source::BUFVAR_NAME, template.eruby_bufvar
     end
 
     should "not cache templates by default" do
@@ -120,12 +107,21 @@ class Deas::Erubis::Source
       assert_equal default_source, context.instance_variable_get('@default_source')
     end
 
+    should "build template objects for template files" do
+      filename = 'basic'
+      template = subject.template(filename, Factory.string)
+
+      assert_equal filename,                          template.filename
+      assert_equal subject.eruby_class,               template.eruby_class
+      assert_equal Deas::Erubis::Source::BUFVAR_NAME, template.eruby_bufvar
+    end
+
   end
 
   class RenderTests < InitTests
     desc "`render` method"
     setup do
-      @template_name   = ["basic", "basic.html"].choice
+      @template_name = ['basic', 'basic_alt'].choice
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer

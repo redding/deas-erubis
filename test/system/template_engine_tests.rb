@@ -10,9 +10,9 @@ class Deas::Erubis::TemplateEngine
     setup do
       @view = OpenStruct.new({
         :identifier => Factory.integer,
-        :name => Factory.string
+        :name       => Factory.string
       })
-      @locals = { 'local1' => Factory.string }
+      @locals  = { 'local1' => Factory.string }
       @content = Proc.new{ "<span>some content</span>" }
 
       @engine = Deas::Erubis::TemplateEngine.new('source_path' => TEMPLATE_ROOT)
@@ -41,8 +41,8 @@ class Deas::Erubis::TemplateEngine
 
     should "compile raw template markup" do
       template_name = 'compile'
-      file_path = TEMPLATE_ROOT.join("#{template_name}#{Deas::Erubis::Source::EXT}").to_s
-      file_content = File.read(file_path)
+      file_path     = TEMPLATE_ROOT.join("#{template_name}.erb").to_s
+      file_content  = File.read(file_path)
 
       exp = Factory.compile_erb_rendered(subject)
       assert_equal exp, subject.compile(template_name, file_content)

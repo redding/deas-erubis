@@ -16,7 +16,7 @@ class Deas::Erubis::TemplateEngine
     subject{ @engine }
 
     should have_imeths :erb_source, :erb_handler_local, :erb_logger_local
-    should have_imeths :render, :partial
+    should have_imeths :render, :partial, :compile
 
     should "be a Deas template engine" do
       assert_kind_of Deas::TemplateEngine, subject

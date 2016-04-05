@@ -39,6 +39,8 @@ module Deas::Erubis
       self.erb_source.render(template_name, locals, &content)
     end
 
+    # this is used when chaining engines where another engine initially loads the
+    # template file
     def compile(template_name, compiled_content)
       self.erb_source.compile(template_name, compiled_content)
     end
