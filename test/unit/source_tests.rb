@@ -30,11 +30,18 @@ class Deas::Erubis::Source
     end
     subject{ @source }
 
-    should have_readers :root, :eruby_class, :cache, :context_class
+    should have_readers :root, :ext, :eruby_class, :cache, :context_class
     should have_imeths :render, :compile, :template
 
     should "know its root" do
       assert_equal @root, subject.root.to_s
+    end
+
+    should "know its extension for looking up source files" do
+      assert_equal '', subject.ext
+
+      source = @source_class.new(@root, :ext => 'erb')
+      assert_equal '.erb', source.ext
     end
 
     should "default its eruby class" do
@@ -143,6 +150,21 @@ class Deas::Erubis::Source
       source.render(@template_name, @file_locals)
 
       assert_equal default_source, context_class.default_source
+    end
+
+    should "only render templates with the matching ext if one is specified" do
+      source = @source_class.new(@root, :ext => 'erb')
+      file_path = Factory.template_file('basic.html.erb')
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, source.render('basic', @file_locals)
+
+      source = @source_class.new(@root, :ext => 'erubis')
+      file_path = Factory.template_file('basic_alt.erubis')
+      exp = Factory.basic_erb_rendered(@file_locals)
+      assert_equal exp, source.render('basic_alt', @file_locals)
+
+      source = @source_class.new(@root, :ext => 'erb')
+      assert_raises(ArgumentError){ source.render('basic_alt', @file_locals) }
     end
 
   end
