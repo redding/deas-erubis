@@ -14,7 +14,7 @@ module Deas::Erubis
 
     def initialize(root, opts)
       @root          = Pathname.new(root.to_s)
-      @ext           = opts[:ext] ? ".#{opts[:ext]}" : ''
+      @ext           = opts[:ext] ? ".#{opts[:ext]}" : nil
       @eruby_class   = opts[:eruby] || DEFAULT_ERUBY
       @cache         = opts[:cache] ? Hash.new : NullCache.new
       @context_class = build_context_class(opts)
@@ -48,16 +48,19 @@ module Deas::Erubis
     def load(template_name)
       @cache[template_name] ||= begin
         if (filename = source_file_path(template_name)).nil?
-          raise ArgumentError, "a template named `#{template_name}` " \
-                               "with `#{@ext}` as an extension does not exist"
+          template_desc = "a template file named #{template_name.inspect}"
+          if !@ext.nil?
+            template_desc += " that ends in #{@ext.inspect}"
+          end
+          raise ArgumentError, "#{template_desc} does not exist"
         end
         content = File.send(File.respond_to?(:binread) ? :binread : :read, filename.to_s)
         template(filename, content)
       end
     end
 
-    def source_file_path(template_name)
-      Dir.glob(self.root.join("#{template_name}*#{@ext}")).first
+    def source_file_path(name)
+      Dir.glob(self.root.join(name.end_with?(@ext) ? name : "#{name}*#{@ext}")).first
     end
 
     def build_context_class(opts)

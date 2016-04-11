@@ -38,7 +38,7 @@ class Deas::Erubis::Source
     end
 
     should "know its extension for looking up source files" do
-      assert_equal '', subject.ext
+      assert_nil subject.ext
 
       source = @source_class.new(@root, :ext => 'erb')
       assert_equal '.erb', source.ext
@@ -156,15 +156,26 @@ class Deas::Erubis::Source
       source = @source_class.new(@root, :ext => 'erb')
       file_path = Factory.template_file('basic.html.erb')
       exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, source.render('basic', @file_locals)
+      ['basic', 'basic.html', 'basic.html.erb'].each do |name|
+        assert_equal exp, source.render(name, @file_locals)
+      end
 
       source = @source_class.new(@root, :ext => 'erubis')
       file_path = Factory.template_file('basic_alt.erubis')
       exp = Factory.basic_erb_rendered(@file_locals)
-      assert_equal exp, source.render('basic_alt', @file_locals)
+      ['basic', 'basic_alt', 'basic_alt.erubis'].each do |name|
+        assert_equal exp, source.render(name, @file_locals)
+      end
 
       source = @source_class.new(@root, :ext => 'erb')
-      assert_raises(ArgumentError){ source.render('basic_alt', @file_locals) }
+      ['basic_alt', 'basic_alt.erubis'].each do |name|
+        assert_raises(ArgumentError){ source.render(name, @file_locals) }
+      end
+
+      source = @source_class.new(@root, :ext => 'html')
+      ['basic', 'basic.html', 'basic.html.erb'].each do |name|
+        assert_raises(ArgumentError){ source.render(name, @file_locals) }
+      end
     end
 
   end
