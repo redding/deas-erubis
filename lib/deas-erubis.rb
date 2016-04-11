@@ -13,6 +13,7 @@ module Deas::Erubis
 
     def erb_source
       @erb_source ||= Source.new(self.source_path, {
+        :ext            => self.opts['ext'],
         :eruby          => self.opts['eruby'],
         :cache          => self.opts['cache'],
         :default_source => self.opts['default_template_source'],

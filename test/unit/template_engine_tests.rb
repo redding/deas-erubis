@@ -10,7 +10,8 @@ class Deas::Erubis::TemplateEngine
     desc "Deas::Erubis::TemplateEngine"
     setup do
       @engine = Deas::Erubis::TemplateEngine.new({
-        'source_path' => TEST_SUPPORT_PATH
+        'source_path' => TEST_SUPPORT_PATH,
+        'ext'         => 'erb'
       })
     end
     subject{ @engine }
@@ -37,6 +38,12 @@ class Deas::Erubis::TemplateEngine
     should "pass any given cache option to its source" do
       engine = Deas::Erubis::TemplateEngine.new('cache' => true)
       assert_kind_of Hash, engine.erb_source.cache
+    end
+
+    should "pass any given ext option to its source" do
+      ext = Factory.string
+      engine = Deas::Erubis::TemplateEngine.new('ext' => ext)
+      assert_equal ".#{ext}", engine.erb_source.ext
     end
 
     should "pass any given deas template source to its source" do
