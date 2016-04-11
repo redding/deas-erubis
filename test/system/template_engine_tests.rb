@@ -31,7 +31,7 @@ class Deas::Erubis::TemplateEngine
 
     should "render partial templates" do
       exp = Factory.partial_erb_rendered(subject, @locals)
-      assert_equal exp, subject.partial('_partial', @locals)
+      assert_equal exp, subject.partial('_partial1', @locals)
     end
 
     should "render partial templates yielding to given content blocks" do

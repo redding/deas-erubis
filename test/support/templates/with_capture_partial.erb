@@ -2,7 +2,7 @@
   <% capture_partial '_yield_partial', 'local1' => local1 do %>
     <span>some content</span>
   <% end %>
-  <% capture_partial '_partial', 'local1' => local1 %>
+  <% capture_partial '_partial1', 'local1' => local1 %>
   <% capture_partial '_partial_no_locals' %>
   <% source_capture_partial @default_source, '_partial_no_locals' %>
 </div>
