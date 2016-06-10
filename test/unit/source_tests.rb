@@ -128,7 +128,7 @@ class Deas::Erubis::Source
   class RenderTests < InitTests
     desc "`render` method"
     setup do
-      @template_name = ['basic', 'basic_alt'].choice
+      @template_name = ['basic', 'basic_alt'].sample
       @file_locals = {
         'name'   => Factory.string,
         'local1' => Factory.integer
