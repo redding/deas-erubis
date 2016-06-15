@@ -18,10 +18,10 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert", ["~> 2.15.1"])
+  gem.add_development_dependency("assert", ["~> 2.16.1"])
 
-  gem.add_dependency("deas",        ["~> 0.40.0"])
+  gem.add_dependency("deas",        ["~> 0.41.0"])
   gem.add_dependency("erubis")
-  gem.add_dependency("much-plugin", ["~> 0.1.0"])
+  gem.add_dependency("much-plugin", ["~> 0.2.0"])
 
 end
