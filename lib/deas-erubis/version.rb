@@ -1,4 +1,4 @@
 module Deas; end
 module Deas::Erubis
-  VERSION = "0.5.5"
+  VERSION = "0.5.6"
 end
