@@ -15,10 +15,12 @@ class Deas::Erubis::TemplateEngine
       @locals  = { 'local1' => Factory.string }
       @content = Proc.new{ "<span>some content</span>" }
 
-      @engine = Deas::Erubis::TemplateEngine.new({
-        'source_path' => TEMPLATE_ROOT,
-        'ext'         => 'erb'
+      @template_source = Deas::TemplateSource.new(TEMPLATE_ROOT)
+      @template_source.engine("erb", Deas::Erubis::TemplateEngine, {
+        "default_template_source" => @template_source
       })
+
+      @engine = @template_source.engines["erb"]
     end
     subject{ @engine }
 

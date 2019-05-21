@@ -54,8 +54,7 @@ module Deas::Erubis
           end
           raise ArgumentError, "#{template_desc} does not exist"
         end
-        content = File.send(File.respond_to?(:binread) ? :binread : :read, filename.to_s)
-        template(filename, content)
+        template(filename, File.read(filename.to_s))
       end
     end
 

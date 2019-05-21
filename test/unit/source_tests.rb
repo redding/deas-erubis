@@ -214,7 +214,7 @@ class Deas::Erubis::Source
   class RenderContentTests < RenderTests
     desc "when yielding to a given content block"
     setup do
-      @template_name = "yield"
+      @template_name = "yield_no_view"
       @content = Proc.new{ "<span>some content</span>" }
     end
 
